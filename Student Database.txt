@@ -1,0 +1,92 @@
+-- SCHEMA
+-- Table for Students
+CREATE TABLE Students (
+    student_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_name VARCHAR(255) NOT NULL,
+    date_of_birth DATE NOT NULL,
+    grade_level INT NOT NULL
+);
+-- Table for Courses
+CREATE TABLE Courses (
+    course_id INT AUTO_INCREMENT PRIMARY KEY,
+    course_name VARCHAR(255) NOT NULL,
+  	course_units INT NOT NULL
+);
+-- Table for Enrollments
+CREATE TABLE Enrollments (
+    enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT,
+    course_id INT,
+    grade FLOAT,
+    FOREIGN KEY (student_id) REFERENCES Students(student_id),
+    FOREIGN KEY (course_id) REFERENCES Courses(course_id)
+);
+-- Table for Teachers
+CREATE TABLE Teachers (
+  teacher_id INT AUTO_INCREMENT PRIMARY KEY,
+  teacher_name VARCHAR(255) NOT NULL,
+  course_id INT,
+  FOREIGN KEY (course_id) REFERENCES Courses(course_id)
+);
+-- Table for Deparments
+CREATE TABLE Departments (
+  department_id INT AUTO_INCREMENT PRIMARY KEY,
+  department_name VARCHAR(255) NOT NULL,
+  teacher_id INT,
+  FOREIGN KEY (teacher_id) REFERENCES Teachers(teacher_id)
+);
+
+-- QUERIES
+INSERT INTO Students (student_id, student_name, date_of_birth, grade_level) VALUES
+    (1, 'Dominic Calixtro', '2001-04-06', 10),
+    (2, 'James Lico', '2001-04-03', 11),
+    (3, 'Mikey Anglacer', '2001-02-28', 12),
+    (4, 'Aeya Quilacio', '2002-04-15', 10);
+    
+INSERT INTO Courses (course_name, course_units) VALUES
+    ('College Calculus', 4),
+    ('Python Basics', 4),
+    ('Physical Education', 2),
+    ('Research 1', 3);    
+
+INSERT INTO Enrollments (student_id, course_id, grade)
+VALUES
+    (1, 1, NULL), (1, 2, NULL), (1, 3, NULL), (1, 4, NULL),
+    (2, 1, NULL), (2, 2, NULL), (2, 3, NULL), (2, 4, NULL),
+    (3, 1, NULL), (3, 2, NULL), (3, 3, NULL), (3, 4, NULL),
+    (4, 1, NULL), (4, 2, NULL), (4, 3, NULL), (4, 4, NULL);
+   
+INSERT INTO Teachers (teacher_name, course_id) VALUES
+    ('Ms. Anna Sta. Maria', 1),
+    ('Mr. Robert Reyes', 2),
+    ('Ms. Michelle Dee', 3),
+    ('Mr. Rendon Labador', 4);  
+    
+INSERT INTO Departments (department_name, teacher_id) VALUES
+    ('Engineering Department', 1),
+    ('ICT Department', 2),
+    ('P.E and Health Deparment', 3),
+    ('Research Deparment', 4);
+    
+-- Retrieve all students enrolled in a specific course.
+SELECT Courses.course_name AS "Course", GROUP_CONCAT(Students.student_name SEPARATOR ', ') AS "Enrolled Students"
+FROM Students
+JOIN Enrollments ON Students.student_id = Enrollments.student_id
+JOIN Courses ON Enrollments.course_id = Courses.course_id
+GROUP BY Courses.course_name;
+
+-- Find the total number of credits taken by each student.
+SELECT Students.student_name AS "Student Name",
+SUM(Courses.course_units) AS "Total Units Taken"
+FROM Students
+JOIN Enrollments ON Students.student_id = Enrollments.student_id
+JOIN Courses ON Enrollments.course_id = Courses.course_id
+GROUP BY Students.student_id, Students.student_name;
+
+-- List all courses along with the number of enrolled students. 
+SELECT Courses.course_name AS "Course",
+COUNT(DISTINCT Students.student_id) AS "Total Enrolled Students"
+FROM Students
+JOIN Enrollments ON Students.student_id = Enrollments.student_id
+JOIN Courses ON Enrollments.course_id = Courses.course_id
+GROUP BY Courses.course_name;
